@@ -1,0 +1,5 @@
+Drgania styków:
+napisanie kodu który rozwiązuje problem tzn. poniżej zmierzonego czasu nie zlicza czas drgania styku wynosil okolo 120 us
+
+Zasilanie czujnika napięciem 5V zrobienie prostego dzielnika napięcia przy wykorzystaniu 3 rezystrów 10kohm 2/3 napięcia wejsciowego 
+

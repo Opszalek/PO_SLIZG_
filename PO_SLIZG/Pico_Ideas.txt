@@ -1,0 +1,14 @@
+Prędkość akt,max
+Wyświetlanie prądu
+Napięcia aku- stan naladowania
+pomiar czasu okrążenia, od momentu nacisniecia gazu do przycisku max speed avg speed time 
+zmiana map w sterowniku jak sie dogadam z dawidem
+Wskaźnik throttle https://www.pngwing.com/en/free-png-zxnup
+
+
+Plik do kicad z pico https://github.com/ncarandini/KiCad-RP-Pico/blob/main/Install%20instructions.md
+
+Dodaj shotyego do zasialania to bedize mozna podpiac komputer podczas testów !!!!!
+
+
+
