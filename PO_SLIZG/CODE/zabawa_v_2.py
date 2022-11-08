@@ -7,127 +7,167 @@ spi = machine.SPI(0, baudrate=40000000, polarity=1, sck=machine.Pin(6), mosi=mac
 IPS = st7789.ST7789(spi, 240, 320, reset=machine.Pin(12, machine.Pin.OUT), dc=machine.Pin(11, machine.Pin.OUT),rotation=3, inversion=False)
 IPS.init()
 
-##################=====================################
-def obrecz_sinusy(r,ym,xm,kolor):
-    for i in  range(math.pi *r):      
-        i += math.pi * r/2       #Zrotowanie rysowania koła
-        IPS.pixel(-int(r*math.sin(i/r)) +xm ,int(r*math.cos(i/r)) + ym , kolor)
-
-def obrecz_bez_sinusow(r,ym,xm,kolor):
-    for i in range(2):      
-        f, ddF_x ,ddF_y, x,y =  1 - r, 1, -2* r, 0 ,r 
-        while (y > 0):
-            
-            if x < y:
-                if (f >= 0) :
-                    y -= 1
-                    ddF_y += 2
-                    f += ddF_y           
-                x += 1;
-                ddF_x += 2;
-                f += ddF_x;
-                rysowanie(ym,xm,kolor,y,x, 1+(i*2))
-                                
-            elif x >= y : 
-                if (f >= 0) :
-                    x += 1;
-                    ddF_y -= 2
-                    f += ddF_y 
-                y -= 1
-                ddF_x -= 2;
-                f += ddF_x
-                rysowanie(ym,xm,kolor,y,x, 2+(i*2))
-
-def rysowanie(ym,xm,kolor,y,x, cwiartka):
-    if cwiartka == 1:
-        IPS.pixel(xm-y, ym -x  ,kolor)
-    elif cwiartka == 2:
-        IPS.pixel(xm-y ,ym-x   ,kolor)
-    elif cwiartka == 3:
-        IPS.pixel(xm +x,ym-y   ,kolor)
-    elif cwiartka == 4:
-        IPS.pixel(xm +x,ym-y  ,kolor)
 
 
-ym = 145                            # Środek po y
-xm= 160                             # Środek po x 
-r = 140                             # Promień obręczy 
-kolor = st7789.color565(200,50,50)  # Kolor obręczy
 
-start = time.ticks_us()                          # Czas start 
-obrecz_sinusy(r,ym,xm,kolor)                     # Wywołanie funkcji 
-delta = time.ticks_diff(time.ticks_us(), start)  # Policzenie upłyniętego czasu w nano-sekundach
-print('Obrecz Z uzyciem trygonometrii:        ' + str(delta/1000) + ' ms')
-
-start2 = time.ticks_us()
-obrecz_bez_sinusow(r,ym+65,xm,kolor)
-delta2 = time.ticks_diff(time.ticks_us(), start2)
-print('Obrecz BEZ uzycia trygonometrii:      ' + str(delta2/1000) + ' ms')
-print('Bez uzycia trygonometrii szybciej o:   ' + str(round(100*delta/delta2))+'%') 
-
-
-################## Przy użyciu @micropython.native ###########################
+##########################
 
 @micropython.native
-def obrecz_sinusy_native(r,ym,xm,kolor):
-    for i in  range(math.pi *r):      
-        i += math.pi * r/2       #Zrotowanie rysowania koła
-        IPS.pixel(-int(r*math.sin(i/r)) +xm ,int(r*math.cos(i/r)) + ym , kolor)
-        
+def linie_():
+  for i in range(240,0,-1):
+      IPS.hline(30,i,30,st7789.color565(240-i,0+i,0))
+
 @micropython.native
-def obrecz_bez_sinusow_native(r,ym,xm,kolor):
-    for i in range(2):      
-        f, ddF_x ,ddF_y, x,y =  1 - r, 1, -2* r, 0 ,r 
-        while (y > 0):
-            
-            if x < y:
-                if (f >= 0) :
-                    y -= 1
-                    ddF_y += 2
-                    f += ddF_y           
-                x += 1;
-                ddF_x += 2;
-                f += ddF_x;
-                rysowanie(ym,xm,kolor,y,x, 1+(i*2))
-                                
-            elif x >= y : 
-                if (f >= 0) :
-                    x += 1;
-                    ddF_y -= 2
-                    f += ddF_y 
-                y -= 1
-                ddF_x -= 2;
-                f += ddF_x
-                rysowanie(ym,xm,kolor,y,x, 2+(i*2))
-                
-@micropython.native
-def rysowanie_native(ym,xm,kolor,y,x, cwiartka):
-    if cwiartka == 1:
-        IPS.pixel(xm-y, ym -x  ,kolor)
-    elif cwiartka == 2:
-        IPS.pixel(xm-y ,ym-x   ,kolor)
-    elif cwiartka == 3:
-        IPS.pixel(xm +x,ym-y   ,kolor)
-    elif cwiartka == 4:
-        IPS.pixel(xm +x,ym-y  ,kolor)
+def pixele_():
+    for y in range(240,0,-1):
+        for x in range(30):
+            IPS.pixel(x,y,st7789.color565(240-y,0+y,0+int(x/2)+int(y/2)))
 
 
-ym_native = 145                     # Środek po y
-xm_native= 160                      # Środek po x 
-r = 140                             # Promień obręczy 
-kolor_native = st7789.color565(50,200,50)  # Kolor obręczy
 
-start3 = time.ticks_us()                                     # Czas start 
-obrecz_sinusy_native(r,ym_native+30,xm_native,kolor_native)  # Wywołanie funkcji 
-delta3 = time.ticks_diff(time.ticks_us(), start3)            # Policzenie upłyniętego czasu w nano-sekundach
-print('Obrecz Z uzyciem trygonometri NATIVE:           ' + str(delta3/1000) + ' ms')
 
-start4 = time.ticks_us()
-obrecz_bez_sinusow_native(r,ym_native+90,xm_native,kolor_native)
-delta4 = time.ticks_diff(time.ticks_us(), start4)
-print('Obrecz BEZ uzycia trygonometrii z NATIVE:     '  + str(delta4/1000) + ' ms')
-print('Bez uzycia trygonometrii  szybciej o:                 ' + str(round(100*delta/delta4))+'%') 
 
+
+
+
+
+
+
+
+
+
+
+############
+start = time.ticks_us()
+linie_()                 
+delta = time.ticks_diff(time.ticks_us(), start)  
+print(' ' + str(delta/1000) + ' ms')
+start = time.ticks_us()                       
+pixele_()              
+delta = time.ticks_diff(time.ticks_us(), start)  
+print(' ' + str(delta/1000) + ' ms')
+
+# ##################=====================################
+# def obrecz_sinusy(r,ym,xm,kolor):
+#     for i in  range(math.pi *r):      
+#         i += math.pi * r/2       #Zrotowanie rysowania koła
+#         IPS.pixel(-int(r*math.sin(i/r)) +xm ,int(r*math.cos(i/r)) + ym , kolor)
+# 
+# def obrecz_bez_sinusow(r,ym,xm,kolor):
+#     for i in range(2):      
+#         f, ddF_x ,ddF_y, x,y =  1 - r, 1, -2* r, 0 ,r 
+#         while (y > 0):
+#             
+#             if x < y:
+#                 if (f >= 0) :
+#                     y -= 1
+#                     ddF_y += 2
+#                     f += ddF_y           
+#                 x += 1;
+#                 ddF_x += 2;
+#                 f += ddF_x;
+#                 rysowanie(ym,xm,kolor,y,x, 1+(i*2))
+#                                 
+#             elif x >= y : 
+#                 if (f >= 0) :
+#                     x += 1;
+#                     ddF_y -= 2
+#                     f += ddF_y 
+#                 y -= 1
+#                 ddF_x -= 2;
+#                 f += ddF_x
+#                 rysowanie(ym,xm,kolor,y,x, 2+(i*2))
+# 
+# def rysowanie(ym,xm,kolor,y,x, cwiartka):
+#     if cwiartka == 1:
+#         IPS.pixel(xm-y, ym -x  ,kolor)
+#     elif cwiartka == 2:
+#         IPS.pixel(xm-y ,ym-x   ,kolor)
+#     elif cwiartka == 3:
+#         IPS.pixel(xm +x,ym-y   ,kolor)
+#     elif cwiartka == 4:
+#         IPS.pixel(xm +x,ym-y  ,kolor)
+# 
+# 
+# ym = 145                            # Środek po y
+# xm= 160                             # Środek po x 
+# r = 140                             # Promień obręczy 
+# kolor = st7789.color565(200,50,50)  # Kolor obręczy
+# 
+# start = time.ticks_us()                          # Czas start 
+# obrecz_sinusy(r,ym,xm,kolor)                     # Wywołanie funkcji 
+# delta = time.ticks_diff(time.ticks_us(), start)  # Policzenie upłyniętego czasu w nano-sekundach
+# print('Obrecz Z uzyciem trygonometrii:        ' + str(delta/1000) + ' ms')
+# 
+# start2 = time.ticks_us()
+# obrecz_bez_sinusow(r,ym+65,xm,kolor)
+# delta2 = time.ticks_diff(time.ticks_us(), start2)
+# print('Obrecz BEZ uzycia trygonometrii:      ' + str(delta2/1000) + ' ms')
+# print('Bez uzycia trygonometrii szybciej o:   ' + str(round(100*delta/delta2))+'%') 
+# 
+# 
+# ################## Przy użyciu @micropython.native ###########################
+# 
+# @micropython.native
+# def obrecz_sinusy_native(r,ym,xm,kolor):
+#     for i in  range(math.pi *r):      
+#         i += math.pi * r/2       #Zrotowanie rysowania koła
+#         IPS.pixel(-int(r*math.sin(i/r)) +xm ,int(r*math.cos(i/r)) + ym , kolor)
+#         
+# @micropython.native
+# def obrecz_bez_sinusow_native(r,ym,xm,kolor):
+#     for i in range(2):      
+#         f, ddF_x ,ddF_y, x,y =  1 - r, 1, -2* r, 0 ,r 
+#         while (y > 0):
+#             
+#             if x < y:
+#                 if (f >= 0) :
+#                     y -= 1
+#                     ddF_y += 2
+#                     f += ddF_y           
+#                 x += 1;
+#                 ddF_x += 2;
+#                 f += ddF_x;
+#                 rysowanie(ym,xm,kolor,y,x, 1+(i*2))
+#                                 
+#             elif x >= y : 
+#                 if (f >= 0) :
+#                     x += 1;
+#                     ddF_y -= 2
+#                     f += ddF_y 
+#                 y -= 1
+#                 ddF_x -= 2;
+#                 f += ddF_x
+#                 rysowanie(ym,xm,kolor,y,x, 2+(i*2))
+#                 
+# @micropython.native
+# def rysowanie_native(ym,xm,kolor,y,x, cwiartka):
+#     if cwiartka == 1:
+#         IPS.pixel(xm-y, ym -x  ,kolor)
+#     elif cwiartka == 2:
+#         IPS.pixel(xm-y ,ym-x   ,kolor)
+#     elif cwiartka == 3:
+#         IPS.pixel(xm +x,ym-y   ,kolor)
+#     elif cwiartka == 4:
+#         IPS.pixel(xm +x,ym-y  ,kolor)
+# 
+# 
+# ym_native = 145                     # Środek po y
+# xm_native= 160                      # Środek po x 
+# r = 140                             # Promień obręczy 
+# kolor_native = st7789.color565(50,200,50)  # Kolor obręczy
+# 
+# start3 = time.ticks_us()                                     # Czas start 
+# obrecz_sinusy_native(r,ym_native+30,xm_native,kolor_native)  # Wywołanie funkcji 
+# delta3 = time.ticks_diff(time.ticks_us(), start3)            # Policzenie upłyniętego czasu w nano-sekundach
+# print('Obrecz Z uzyciem trygonometri NATIVE:           ' + str(delta3/1000) + ' ms')
+# 
+# start4 = time.ticks_us()
+# obrecz_bez_sinusow_native(r,ym_native+90,xm_native,kolor_native)
+# delta4 = time.ticks_diff(time.ticks_us(), start4)
+# print('Obrecz BEZ uzycia trygonometrii z NATIVE:     '  + str(delta4/1000) + ' ms')
+# print('Bez uzycia trygonometrii  szybciej o:                 ' + str(round(100*delta/delta4))+'%') 
+# 
 
 # 
 # def pointer_poly(length, radius):

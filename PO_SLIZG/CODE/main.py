@@ -7,10 +7,15 @@ import screen
 import buttons
 import greeks as rd
 from machine import ADC, PWM
+
+import uasyncio as asyncio
+from aswitch import Pushbutton
+
 tft=screen.SCREEN()
 potentiometer = ADC(28)
 sensor = Pin(0, Pin.IN, Pin.PULL_DOWN)
-btn = Pin(15, Pin.IN, Pin.PULL_UP)
+btn1_ = Pin(14, Pin.IN, Pin.PULL_UP)
+btn2_ = Pin(15, Pin.IN, Pin.PULL_UP)
 start=0
 obwod=11*2.54*3.14/100
 speed=0
@@ -32,18 +37,36 @@ def speed_(Pin):
         
         speed=(obwod*3.6*1000/raz)/15
         
-oo=['sensor','btn']        
+scr=1
+current=0
 
-sensor.irq(handler=speed_,trigger=Pin.IRQ_RISING,oo,1)
+sensor.irq(handler=speed_,trigger=Pin.IRQ_RISING)
 #btn.irq(handler=speed_,trigger=Pin.IRQ_RISING,priority=2)
+async def my_app():
+          
+    btn1.press_func(btn1_click)
+    btn2.press_func(btn2_click)
+    
+    await asyncio.sleep(0)
 
-  
-
+btn1=Pushbutton(btn1_, suppress=True)
+btn2=Pushbutton(btn2_, suppress=True)
+ 
+def btn1_click():
+    global scr
+    scr=1
+    
+def btn2_click():
+    global scr
+    scr=2
+    
+    
 while True:
-    time.sleep(1)
-    #tft.screen_select(1,speed)
+    loop = asyncio.get_event_loop()
+    loop.run_until_complete(my_app())
     potentiometer_value = potentiometer.read_u16() * 3.3 / 65536
-    print(potentiometer_value)
+    current=potentiometer_value
+    tft.screen_select(scr,speed,current)
     
    
 
